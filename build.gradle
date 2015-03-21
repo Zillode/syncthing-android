@@ -53,22 +53,10 @@ android {
         }
     }
 
-    signingConfigs {
-        release {
-            storeFile file(System.getenv("key.store"))
-            storePassword System.getenv("key.store.password")
-            keyAlias System.getenv("key.alias")
-            keyPassword System.getenv("key.alias.password")
-        }
-    }
-
     buildTypes {
         debug {
             applicationIdSuffix ".debug"
             debuggable true
-        }
-        release {
-            signingConfig signingConfigs.release
         }
     }
 
@@ -133,3 +121,16 @@ task cleanNative(type: Delete) {
 }
 clean.dependsOn cleanNative
 
+allprojects {
+    afterEvaluate { project ->
+        def configName = 'release'
+        if (System.getenv("key.alias") && android.signingConfigs.hasProperty(configName)) {
+            def props = new Properties()
+            android.signingConfigs[configName].storeFile = file(System.getenv("key.store"))
+            android.signingConfigs[configName].storePassword =System.getenv("key.store.password")
+            android.signingConfigs[configName].keyAlias = System.getenv("key.alias")
+            android.signingConfigs[configName].keyPassword = System.getenv("key.alias.password")
+            android.buildTypes.signingConfig = signingConfigs.release
+        }
+    }
+}
