@@ -230,8 +230,6 @@ public class SettingsFragment extends PreferenceFragment
             mSyncthingService.getApi().setValue(
                     RestApi.TYPE_GUI, preference.getKey(), o, false, getActivity());
         } else if (preference.getKey().equals(GUI_AUTH)) {
-            Preference gui_auth = mGuiScreen.findPreference(GUI_AUTH);
-            gui_auth.setEnabled((Boolean) o);
             Preference gui_user = mGuiScreen.findPreference(GUI_USER);
             gui_user.setEnabled((Boolean) o);
             Preference gui_password = mGuiScreen.findPreference(GUI_PASSWORD);
