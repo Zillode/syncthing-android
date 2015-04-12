@@ -259,7 +259,7 @@ public class SyncthingService extends Service {
 
         mDeviceStateHolder = new DeviceStateHolder(SyncthingService.this);
         registerReceiver(mDeviceStateHolder, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-        new StartupTask().execute();
+        new StartupTask(sp.getString("gui_user",""), sp.getString("gui_password","")).execute();
     }
 
     /**
@@ -268,6 +268,14 @@ public class SyncthingService extends Service {
      * {@code Pair<String, String>}.
      */
     private class StartupTask extends AsyncTask<Void, Void, Pair<String, String>> {
+        String mGuiUser;
+        String mGuiPassword;
+
+        public StartupTask(String guiUser, String guiPassword) {
+            mGuiUser = guiUser;
+            mGuiPassword = guiPassword;
+        }
+
         @Override
         protected Pair<String, String> doInBackground(Void... voids) {
             mConfig = new ConfigXml(SyncthingService.this);
@@ -277,6 +285,7 @@ public class SyncthingService extends Service {
         @Override
         protected void onPostExecute(Pair<String, String> urlAndKey) {
             mApi = new RestApi(SyncthingService.this, urlAndKey.first, urlAndKey.second,
+                    mGuiUser, mGuiPassword,
                     new RestApi.OnApiAvailableListener() {
                 @Override
                 public void onApiAvailable() {
