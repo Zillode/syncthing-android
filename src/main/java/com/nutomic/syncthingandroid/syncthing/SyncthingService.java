@@ -244,14 +244,16 @@ public class SyncthingService extends Service {
         // {@link #isFirstStart()} after a while.
         if (sp.getString("gui_user", "").equals("")) {
             char[] chars =
-                    "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz".toCharArray();
+                    ("123456789ABCDEFGHJKLMNPQRSTUVWXYZ"+
+                    "abcdefghijkmnopqrstuvwxyz"+
+                    "!\"$%^&*()_-+={[}];@~#|\\<,>.?/").toCharArray();
             StringBuilder sb = new StringBuilder();
             SecureRandom random = new SecureRandom();
             for (int i = 0; i < 20; i++)
                 sb.append(chars[random.nextInt(chars.length)]);
 
             String user = Build.MODEL.replaceAll("[^a-zA-Z0-9 ]", "");
-            Log.i(TAG, "Generated GUI username and password (username is " + user + ")");
+            Log.i(TAG, "Generated GUI user and password (user is " + user + ")");
             sp.edit().putString("gui_user", user)
                      .putString("gui_password", sb.toString()).commit();
         }
