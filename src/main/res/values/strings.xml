@@ -252,6 +252,8 @@ Please report any problems you encounter via Github.</string>
 
     <string name="gui_address">GUI Listen Addresses</string>
 
+    <string name="gui_auth">GUI Authentication</string>
+
     <string name="gui_user">GUI Authentication User</string>
 
     <string name="gui_password">GUI Authentication Password</string>

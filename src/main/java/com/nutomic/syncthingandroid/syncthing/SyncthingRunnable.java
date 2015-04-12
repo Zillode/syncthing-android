@@ -57,8 +57,10 @@ public class SyncthingRunnable implements Runnable {
                 env.put("STTRACE", sp.getString("sttrace", ""));
                 env.put("STNORESTART", "1");
                 env.put("STNOUPGRADE", "1");
-                env.put("STGUIAUTH", sp.getString("gui_user", "") + ":" +
-                        sp.getString("gui_password", ""));
+                if (sp.getBoolean("gui_auth", false)) {
+                    env.put("STGUIAUTH", sp.getString("gui_user", "") + ":" +
+                            sp.getString("gui_password", ""));
+                }
                 process = pb.start();
 
                 dos = new DataOutputStream(process.getOutputStream());

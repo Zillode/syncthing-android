@@ -32,6 +32,7 @@ public class SettingsFragment extends PreferenceFragment
     private static final String DEVICE_NAME_KEY       = "deviceName";
     private static final String USAGE_REPORT_ACCEPTED = "urAccepted";
     private static final String ADDRESS               = "address";
+    private static final String GUI_AUTH              = "gui_auth";
     private static final String GUI_USER              = "gui_user";
     private static final String GUI_PASSWORD          = "gui_password";
     private static final String EXPORT_CONFIG         = "export_config";
@@ -83,6 +84,12 @@ public class SettingsFragment extends PreferenceFragment
 
             Preference address = mGuiScreen.findPreference(ADDRESS);
             applyPreference(address, api.getValue(RestApi.TYPE_GUI, ADDRESS));
+
+            CheckBoxPreference gui_auth = (CheckBoxPreference)mGuiScreen.findPreference(GUI_AUTH);
+            Preference gui_user = mGuiScreen.findPreference(GUI_USER);
+            gui_user.setEnabled(gui_auth.isChecked());
+            Preference gui_password = mGuiScreen.findPreference(GUI_PASSWORD);
+            gui_password.setEnabled(gui_auth.isChecked());
         }
     }
 
@@ -123,8 +130,9 @@ public class SettingsFragment extends PreferenceFragment
         Preference appVersion = screen.findPreference(APP_VERSION_KEY);
         mOptionsScreen = (PreferenceScreen) screen.findPreference(SYNCTHING_OPTIONS_KEY);
         mGuiScreen = (PreferenceScreen) screen.findPreference(SYNCTHING_GUI_KEY);
-        Preference user = screen.findPreference(GUI_USER);
-        Preference password = screen.findPreference(GUI_PASSWORD);
+        Preference auth = (CheckBoxPreference) mGuiScreen.findPreference(GUI_AUTH);
+        Preference user = mGuiScreen.findPreference(GUI_USER);
+        Preference password = mGuiScreen.findPreference(GUI_PASSWORD);
         Preference sttrace = findPreference(STTRACE);
 
         try {
@@ -139,11 +147,13 @@ public class SettingsFragment extends PreferenceFragment
         mSyncOnlyWifi.setOnPreferenceChangeListener(this);
         screen.findPreference(EXPORT_CONFIG).setOnPreferenceClickListener(this);
         screen.findPreference(IMPORT_CONFIG).setOnPreferenceClickListener(this);
+        auth.setOnPreferenceChangeListener(this);
         user.setOnPreferenceChangeListener(this);
         password.setOnPreferenceChangeListener(this);
         // Force summary update and wifi/charging preferences enable/disable.
         onPreferenceChange(mAlwaysRunInBackground, mAlwaysRunInBackground.isChecked());
         sttrace.setOnPreferenceChangeListener(this);
+
 
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
         user.setSummary(sp.getString("gui_user", ""));
@@ -219,6 +229,14 @@ public class SettingsFragment extends PreferenceFragment
         } else if (preference.getKey().equals(ADDRESS)) {
             mSyncthingService.getApi().setValue(
                     RestApi.TYPE_GUI, preference.getKey(), o, false, getActivity());
+        } else if (preference.getKey().equals(GUI_AUTH)) {
+            Preference gui_auth = mGuiScreen.findPreference(GUI_AUTH);
+            gui_auth.setEnabled((Boolean) o);
+            Preference gui_user = mGuiScreen.findPreference(GUI_USER);
+            gui_user.setEnabled((Boolean) o);
+            Preference gui_password = mGuiScreen.findPreference(GUI_PASSWORD);
+            gui_password.setEnabled((Boolean) o);
+            mSyncthingService.getApi().requireRestart(getActivity());
         }
 
         // Avoid any code injection.

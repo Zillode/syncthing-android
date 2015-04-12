@@ -242,8 +242,7 @@ public class SyncthingService extends Service {
 
         // Make sure this is also done for existing installs. We can replace this check with
         // {@link #isFirstStart()} after a while.
-        if (!sp.getBoolean("default_user_pw_set", false)) {
-            sp.edit().putBoolean("default_user_pw_set", true).commit();
+        if (sp.getString("gui_user", "").equals("")) {
             char[] chars =
                     "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz".toCharArray();
             StringBuilder sb = new StringBuilder();

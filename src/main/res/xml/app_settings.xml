@@ -92,6 +92,11 @@
                 android:title="@string/gui_address"
                 android:persistent="false" />
 
+            <CheckBoxPreference
+                android:key="gui_auth"
+                android:title="@string/gui_auth"
+                android:defaultValue="false" />
+
             <EditTextPreference
                 android:key="gui_user"
                 android:title="@string/gui_user" />
