@@ -38,6 +38,7 @@ public class SettingsFragment extends PreferenceFragment
     private static final String EXPORT_CONFIG         = "export_config";
     private static final String IMPORT_CONFIG         = "import_config";
     private static final String STTRACE               = "sttrace";
+    private static final String SYNCTHING_RESET       = "streset";
 
     private static final String SYNCTHING_VERSION_KEY = "syncthing_version";
 
@@ -153,8 +154,7 @@ public class SettingsFragment extends PreferenceFragment
         // Force summary update and wifi/charging preferences enable/disable.
         onPreferenceChange(mAlwaysRunInBackground, mAlwaysRunInBackground.isChecked());
         sttrace.setOnPreferenceChangeListener(this);
-
-
+        screen.findPreference(SYNCTHING_RESET).setOnPreferenceClickListener(this);
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
         user.setSummary(sp.getString("gui_user", ""));
         sttrace.setSummary(sp.getString("sttrace", ""));
@@ -281,6 +281,9 @@ public class SettingsFragment extends PreferenceFragment
                     Toast.makeText(getActivity(), getString(R.string.config_import_failed,
                             SyncthingService.EXPORT_PATH), Toast.LENGTH_LONG).show();
                 }
+                return true;
+            case SYNCTHING_RESET:
+                ((SyncthingActivity) getActivity()).getApi().resetSyncthing(getActivity());
                 return true;
             default:
                 return false;
