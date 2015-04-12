@@ -68,6 +68,9 @@ public class GetTask extends AsyncTask<String, Void, String> {
             HttpGet get = new HttpGet(fullUri);
             get.addHeader(new BasicHeader(RestApi.HEADER_API_KEY, params[2]));
 
+            if (isCancelled())
+                return null;
+
             try {
                 HttpResponse response = httpclient.execute(get);
                 HttpEntity entity = response.getEntity();
