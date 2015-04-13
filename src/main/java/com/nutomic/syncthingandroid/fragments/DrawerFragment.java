@@ -125,6 +125,7 @@ public class DrawerFragment extends Fragment implements RestApi.OnReceiveSystemI
 
         initMenu();
         mList.setOnItemClickListener(this);
+        mDeviceId.setText("\n\n");
 
         return view;
     }
