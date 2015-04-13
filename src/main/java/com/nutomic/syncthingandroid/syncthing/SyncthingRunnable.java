@@ -33,7 +33,9 @@ public class SyncthingRunnable implements Runnable {
 
     private boolean mGenerate;
 
-    private String mCommand;
+    private String mSyncthing;
+
+    private String[] mCommand;
 
     public enum Command {
         generate, // Generate keys, a config file and immediately exit.
@@ -48,31 +50,20 @@ public class SyncthingRunnable implements Runnable {
      */
     public SyncthingRunnable(Context context, Command command) {
         mContext = context;
-        String syncthing = mContext.getApplicationInfo().dataDir + "/" + SyncthingService.BINARY_NAME;
+        mSyncthing = mContext.getApplicationInfo().dataDir + "/" + SyncthingService.BINARY_NAME;
         switch (command) {
             case generate:
-                mCommand = syncthing + " -generate='" + mContext.getFilesDir() + "' -no-browser";
+                mCommand = new String[]{ mSyncthing, "-generate", mContext.getFilesDir().toString() };
                 break;
             case main:
-                mCommand = syncthing + " -home='" + mContext.getFilesDir() + "' -no-browser";
+                mCommand = new String[]{ mSyncthing, "-home", mContext.getFilesDir().toString(), "-no-browser" };
                 break;
             case reset:
-                mCommand = syncthing + " -home='" + mContext.getFilesDir() + "' -reset";
+                mCommand = new String[]{ mSyncthing, "-home", mContext.getFilesDir().toString(), "-reset" };
                 break;
             default:
                 Log.w(TAG, "Unknown command option");
-                mCommand = "";
         }
-    }
-
-    /**
-     * Constructs instance.
-     *
-     * @param manualCommand The exact command to be executed on the shell. Used for tests only.
-     */
-    public SyncthingRunnable(Context context, String manualCommand) {
-        mContext = context;
-        mCommand = manualCommand;
     }
 
     @Override
@@ -80,11 +71,19 @@ public class SyncthingRunnable implements Runnable {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mContext);
         DataOutputStream dos = null;
         int ret = 1;
+        // Make sure Syncthing is executable
+        try {
+            ProcessBuilder pb = new ProcessBuilder("chmod", "+x", mSyncthing);
+            pb.start().waitFor();
+        } catch (IOException|InterruptedException e) {
+            Log.w(TAG, "Failed to chmod Syncthing", e);
+        }
+        // Loop Syncthing
         Process process = null;
         try {
             // Loop to handle Syncthing restarts (these always have an error code of 3).
             do {
-                ProcessBuilder pb = new ProcessBuilder("sh");
+                ProcessBuilder pb = new ProcessBuilder(mCommand);
                 Map<String, String> env = pb.environment();
                 // Set home directory to data folder for web GUI folder picker.
                 env.put("HOME", Environment.getExternalStorageDirectory().getAbsolutePath());
@@ -98,14 +97,6 @@ public class SyncthingRunnable implements Runnable {
                 process = pb.start();
 
                 dos = new DataOutputStream(process.getOutputStream());
-                // Set (Android) home directory to data folder for syncthing to use.
-                dos.writeBytes("HOME=" + Environment.getExternalStorageDirectory() + " ");
-                dos.writeBytes("STTRACE=" + pm.getString("sttrace", "") + " ");
-                dos.writeBytes("STNORESTART=1 ");
-                dos.writeBytes("STNOUPGRADE=1 ");
-                dos.writeBytes(mCommand);
-                dos.writeBytes("\nexit\n");
-                dos.flush();
 
                 log(process.getInputStream(), Log.INFO);
                 log(process.getErrorStream(), Log.WARN);
