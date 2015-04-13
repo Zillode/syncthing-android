@@ -148,13 +148,14 @@ public class SettingsFragment extends PreferenceFragment
         mSyncOnlyWifi.setOnPreferenceChangeListener(this);
         screen.findPreference(EXPORT_CONFIG).setOnPreferenceClickListener(this);
         screen.findPreference(IMPORT_CONFIG).setOnPreferenceClickListener(this);
+        screen.findPreference(SYNCTHING_RESET).setOnPreferenceClickListener(this);
         auth.setOnPreferenceChangeListener(this);
         user.setOnPreferenceChangeListener(this);
         password.setOnPreferenceChangeListener(this);
+        sttrace.setOnPreferenceChangeListener(this);
+
         // Force summary update and wifi/charging preferences enable/disable.
         onPreferenceChange(mAlwaysRunInBackground, mAlwaysRunInBackground.isChecked());
-        sttrace.setOnPreferenceChangeListener(this);
-        screen.findPreference(SYNCTHING_RESET).setOnPreferenceClickListener(this);
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
         user.setSummary(sp.getString("gui_user", ""));
         sttrace.setSummary(sp.getString("sttrace", ""));

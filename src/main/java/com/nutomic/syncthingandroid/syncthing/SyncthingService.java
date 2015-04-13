@@ -213,7 +213,6 @@ public class SyncthingService extends Service {
             mCurrentState = State.STARTING;
             registerOnWebGuiAvailableListener(mApi);
             new PollWebGuiAvailableTaskImpl(getFilesDir() + "/" + HTTPS_CERT_FILE).execute(mConfig.getWebGuiUrl());
-            new PollWebGuiAvailableTaskImpl().execute(mConfig.getWebGuiUrl());
             new Thread(new SyncthingRunnable(this, SyncthingRunnable.Command.main)).start();
             Notification n = new NotificationCompat.Builder(this)
                     .setContentTitle(getString(R.string.syncthing_active))
