@@ -181,6 +181,7 @@ public class DrawerFragment extends Fragment implements RestApi.OnReceiveSystemI
             return;
 
         mDeviceId.setText(info.myID);
+        mDeviceId.setVisibility(View.VISIBLE);
         mDeviceId.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
