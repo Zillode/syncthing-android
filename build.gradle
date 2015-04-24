@@ -36,8 +36,6 @@ dependencies {
 preBuild {
     if (Os.isFamily(Os.FAMILY_WINDOWS)) {
         dependsOn 'downloadNative'
-    } else {
-        dependsOn 'buildNative'
     }
 }
 
@@ -118,7 +116,7 @@ def getVersionCodeFromManifest() {
     return Integer.parseInt(matcher.group(1))
 }
 
-task downloadNative(type: Copy) {
+task downloadNative(type: Copy) << {
     def release = new JsonSlurper().parseText("https://api.github.com/repos/syncthing/syncthing/releases/latest".toURL().text)
 
     // Download ARM
