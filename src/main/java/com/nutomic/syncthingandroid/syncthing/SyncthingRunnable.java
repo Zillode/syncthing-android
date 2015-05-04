@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Runs the syncthing binary from command line, and prints its output to logcat.
@@ -29,11 +30,13 @@ public class SyncthingRunnable implements Runnable {
 
     public static final String UNIT_TEST_PATH = "was running";
 
+    private static final AtomicReference<Process> mSyncthing = new AtomicReference<>();
+
     private final Context mContext;
 
     private boolean mGenerate;
 
-    private String mSyncthing;
+    private String mSyncthingBinary;
 
     private String[] mCommand;
 
@@ -50,16 +53,16 @@ public class SyncthingRunnable implements Runnable {
      */
     public SyncthingRunnable(Context context, Command command) {
         mContext = context;
-        mSyncthing = mContext.getApplicationInfo().dataDir + "/" + SyncthingService.BINARY_NAME;
+        mSyncthingBinary = mContext.getApplicationInfo().dataDir + "/" + SyncthingService.BINARY_NAME;
         switch (command) {
             case generate:
-                mCommand = new String[]{ mSyncthing, "-generate", mContext.getFilesDir().toString() };
+                mCommand = new String[]{ mSyncthingBinary, "-generate", mContext.getFilesDir().toString() };
                 break;
             case main:
-                mCommand = new String[]{ mSyncthing, "-home", mContext.getFilesDir().toString(), "-no-browser" };
+                mCommand = new String[]{ mSyncthingBinary, "-home", mContext.getFilesDir().toString(), "-no-browser" };
                 break;
             case reset:
-                mCommand = new String[]{ mSyncthing, "-home", mContext.getFilesDir().toString(), "-reset" };
+                mCommand = new String[]{ mSyncthingBinary, "-home", mContext.getFilesDir().toString(), "-reset" };
                 break;
             default:
                 Log.w(TAG, "Unknown command option");
@@ -73,7 +76,7 @@ public class SyncthingRunnable implements Runnable {
         int ret = 1;
         // Make sure Syncthing is executable
         try {
-            ProcessBuilder pb = new ProcessBuilder("chmod", "+x", mSyncthing);
+            ProcessBuilder pb = new ProcessBuilder("chmod", "+x", mSyncthingBinary);
             pb.start().waitFor();
         } catch (IOException|InterruptedException e) {
             Log.w(TAG, "Failed to chmod Syncthing", e);
@@ -95,6 +98,7 @@ public class SyncthingRunnable implements Runnable {
                             sp.getString("gui_password", ""));
                 }
                 process = pb.start();
+                mSyncthing.set(process);
 
                 dos = new DataOutputStream(process.getOutputStream());
 
@@ -104,6 +108,7 @@ public class SyncthingRunnable implements Runnable {
                 niceSyncthing();
 
                 ret = process.waitFor();
+                mSyncthing.set(null);
 
                 if (ret == 3) {
                     Log.i(TAG, "Restarting syncthing");
@@ -176,6 +181,18 @@ public class SyncthingRunnable implements Runnable {
      *
      */
     public static void killSyncthing() {
+        final Process p = mSyncthing.get();
+        if (p != null) {
+            mSyncthing.set(null);
+            p.destroy();
+            try {
+                p.waitFor();
+            } catch (InterruptedException e) {
+                Log.w(TAG_KILL, "Failed to kill Syncthing's process", e);
+            }
+        }
+
+        // Ensure kill
         for (int i = 0; i < 2; i++) {
             Process ps = null;
             DataOutputStream psOut = null;
