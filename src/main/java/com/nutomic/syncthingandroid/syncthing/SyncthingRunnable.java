@@ -102,13 +102,15 @@ public class SyncthingRunnable implements Runnable {
 
                 dos = new DataOutputStream(process.getOutputStream());
 
-                log(process.getInputStream(), Log.INFO);
-                log(process.getErrorStream(), Log.WARN);
+                Thread lInfo = log(process.getInputStream(), Log.INFO);
+                Thread lWarn = log(process.getErrorStream(), Log.WARN);
 
                 niceSyncthing();
 
                 ret = process.waitFor();
                 mSyncthing.set(null);
+                lInfo.join();
+                lWarn.join();
 
                 if (ret == 3) {
                     Log.i(TAG, "Restarting syncthing");
@@ -267,14 +269,14 @@ public class SyncthingRunnable implements Runnable {
      * @param is The stream to log.
      * @param priority The priority level.
      */
-    private void log(final InputStream is, final int priority) {
-        new Thread(new Runnable() {
+    private Thread log(final InputStream is, final int priority) {
+        Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
-                InputStreamReader isr = new InputStreamReader(is);
-                BufferedReader br = new BufferedReader(isr);
-                String line;
                 try {
+                    InputStreamReader isr = new InputStreamReader(is);
+                    BufferedReader br = new BufferedReader(isr);
+                    String line;
                     while ((line = br.readLine()) != null) {
                         Log.println(priority, TAG_NATIVE, line);
                     }
@@ -284,7 +286,9 @@ public class SyncthingRunnable implements Runnable {
                     Log.w(TAG, "Failed to read Syncthing's command line output", e);
                 }
             }
-        }).start();
+        });
+        t.start();
+        return t;
     }
 
 }
