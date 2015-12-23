@@ -18,7 +18,7 @@ case "$1" in
         fi
         export CC=${MYDIR}/build/ndk-$1/bin/arm-linux-androideabi-gcc
         export CXX=${MYDIR}/build/ndk-$1/bin/arm-linux-androideabi-g++
-        export CGO_ENABLED=1
+        export CGO_ENABLED=0
         export GOOS=android
         export GOARCH=arm
         export GOARM=5
@@ -30,7 +30,7 @@ case "$1" in
         fi
         export CC_FOR_TARGET=${MYDIR}/build/ndk-$1/bin/i686-linux-android-gcc
         export CXX_FOR_TARGET=${MYDIR}/build/ndk-$1/bin/i686-linux-android-g++
-        export CGO_ENABLED=1
+        export CGO_ENABLED=0
         export GOOS=android
         export GOARCH=386
         export GO386=387
@@ -42,7 +42,7 @@ case "$1" in
         fi
         export CC_FOR_TARGET=${MYDIR}/build/ndk-$1/bin/x86_64-linux-android-gcc
         export CXX_FOR_TARGET=${MYDIR}/build/ndk-$1/bin/x86_64-linux-android-g++
-        export CGO_ENABLED=1
+        export CGO_ENABLED=0
         export GOOS=android
         export GOARCH=amd64
         export TARGETDIR=${MYDIR}/libs/x86_64
